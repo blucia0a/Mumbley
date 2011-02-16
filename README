@@ -1,0 +1,41 @@
+Mumbley - A gibberish generator
+Copyright Brandon Lucia 2011
+
+
+OVERVIEW:
+---------
+Mumbley is a gibberish generator based on a first-order markov model of phoenetics.  
+
+THe model is derived from a text-only version of 1M sentences from the release version of wikipedia.
+
+I used the phoeneticization tool at http://www.foreignword.com/dictionary/truespel/transpel.htm to
+convert the wikipedia text to phoenetics.  I then wrote a parser based on the website's phoenetic tokens,
+and built a model that determines, given a letter, what the distribution of likely next letters is.
+----------------------------
+
+CONTENTS OF PROJECT:
+---------------------
+Mumbley.pl -- converts text to phoenetics.  Requires WWW::Mechanize (easily installed from CPAN).
+
+MumbleyModel.pl -- creates a MumbleyMarkovModel.  If you have a phoeneticized document (like one produced by Mumbley.pl), you can feed it in here, and it will dump a markov model of the phoenetics.  Requires HOP::Lexer (also easily installable on CPAN).
+
+MumbleyMumbler.pl -- takes a model as input (on the command line) and dumps syllables of likely english to stdout.
+
+Model -- this is a model that I've built from wikipedia text.  The source text isn't included because I don't know if it's kosher to include all of wikipedia in a public project.
+---------------------------------------
+
+
+USAGE:
+-------
+
+TO GENERATE PHOENETICIZED TEXT (from a document in plaintext format):
+--------------------------------------------------------------------
+cat document.txt | ./Mumbley.pl > phoeneticized
+
+TO GENERATE A NEW MODEL (from the phoeneticized text in the file phoeneticized)
+-------------------------------------------------------------------------------
+./MumbleyModel': cat phoeneticized | lynx -width=80 -stdin -dump -hiddenlinks=ignore -nolist | sed -e 's/_//g' | sed -e 's/[(),.\/0-9"-:]//g' | ./MumbleyModel.pl > Model
+
+TO MAKE YOUR COMPUTER SPOUT GIBBERISH:(using a model in the file called Model):
+------------------------------------------------------------------------------
+./MumbleyMumbler.pl ./Model | xargs -Ifoo say -v whisper "foo"
