@@ -7,100 +7,25 @@ use lib '/opt/local/lib/perl5/5.8.9';
 
 my %model;
 my %modelTotals; 
-my %sayMap;
-$sayMap{"i"} = "it";
-$sayMap{"ie"} = "i";
-$sayMap{"e"} = "ehh";
-$sayMap{"ee"} = "ee";
-$sayMap{"er"} = "er";
-$sayMap{"u"} = "uh";
-$sayMap{"ue"} = "oo";
-$sayMap{"ahe"} = "ahe";
-$sayMap{"ae"} = "ey";
-$sayMap{"ah"} = "ah";
-$sayMap{"au"} = "aw";
-$sayMap{"air"} = "air";
-$sayMap{"oe"} = "o";
-$sayMap{"oo"} = "oo";
-$sayMap{"or"} = "or";
-$sayMap{"ou"} = "ow";
-$sayMap{"oi"} = "oy";
-
-$sayMap{"sh"} = "sh";
-$sayMap{"ssh"} = "sh";
-
-$sayMap{"ch"} = "ch";
-$sayMap{"cch"} = "ch";
-$sayMap{"thh"} = "tha";
-$sayMap{"tthh"} = "tha";
-$sayMap{"th"} = "tha";
-$sayMap{"tth"} = "tha";
-$sayMap{"zh"} = "je";
-$sayMap{"zzh"} = "je";
-
-$sayMap{"n"} = "n";
-$sayMap{"nn"} = "n";
-
-$sayMap{"s"} = "s";
-$sayMap{"ss"} = "s";
-
-$sayMap{"t"} = "t";
-$sayMap{"tt"} = "t";
-
-$sayMap{"l"} = "l";
-$sayMap{"ll"} = "l";
-$sayMap{"k"} = "k";
-$sayMap{"kk"} = "k";
-$sayMap{"d"} = "d";
-$sayMap{"dd"} = "d";
-$sayMap{"r"} = "r";
-$sayMap{"rr"} = "r";
-$sayMap{"z"} = "z";
-$sayMap{"zz"} = "z";
-$sayMap{"p"} = "p";
-$sayMap{"pp"} = "p";
-$sayMap{"m"} = "m";
-$sayMap{"mm"} = "m";
-$sayMap{"g"} = "g";
-$sayMap{"gg"} = "g";
-$sayMap{"b"} = "b";
-$sayMap{"bb"} = "b";
-$sayMap{"f"} = "f";
-$sayMap{"ff"} = "f";
-$sayMap{"y"} = "y";
-$sayMap{"yy"} = "y";
-$sayMap{"v"} = "v";
-$sayMap{"vv"} = "v";
-$sayMap{"w"} = "w";
-$sayMap{"ww"} = "w";
-$sayMap{"j"} = "j";
-$sayMap{"jj"} = "j";
-$sayMap{"h"} = "h";
-$sayMap{"hh"} = "h";
 
 &getModel($ARGV[0]);
 
-
-
 my $sent = "";
-my $syl = "i";
+my $syl = "EH";
+
+
 while(1){
 
-  if(exists $sayMap{$syl}){
-    $sent .= $sayMap{$syl};
-  }else{
+  $sent .= $syl;
 
-    $sent .= $syl;
-  }
   $syl = &getRandomFollower($syl);
 
-  if( int(rand(5)) == 0 ){ #every 7 syllables or so break a word
+  if( $syl eq "~" ){ #every 7 syllables or so break a word
     $sent .= " ";
   }
   
   if( int(rand(50)) == 0 ){ #every 50 syllables or so (7-8 words) break a line, and say it.
     $sent .= "\n";
-    #system("say -v whisper $sent");
     print $sent;
     $sent = "";
   }
@@ -111,23 +36,25 @@ while(1){
 sub getRandomFollower(){
 
   my $k = shift;
-  return "" if (!exists $modelTotals{$k});
-  my $bound = rand($modelTotals{$k}) / $modelTotals{$k};
+  my $bound = rand();
 
-  my $runningTotal = 0;
   my $innerk;
   foreach $innerk(sort { $model{$k}->{$a} <=> $model{$k}->{$b} } keys %{$model{$k}}){
- 
-    $runningTotal += ($model{$k}->{$innerk} / $modelTotals{$k});
-    if($runningTotal > $bound){
+    $bound -= $model{$k}->{$innerk};
+    #print "$bound: $innerk (".$model{$k}->{$innerk}.")\n";
+  
+    if($bound <= 0){
+      #print "<<<<$innerk>>>>\n";
       return $innerk;
     }
 
   }
+  warn "No $innerk\n";
 
 }
 
 sub getModel(){
+
   my $modelFile = shift;
 
   my $curLetter = "";
@@ -137,14 +64,14 @@ sub getModel(){
 
     chomp;
     
-    if(/^[a-z]/){
-      s/[^a-z]//g;
+    if(/^[a-zA-Z1-9_\~]/){
+      s/[^a-zA-Z1-9_\~]//g;
       $curLetter = $_;
 
-    }elsif(/[a-z]/){
+    }elsif(/[a-zA-Z1-9_\~]/){
 
       my ($let,$freq) = split /->/;
-      $let =~ s/[^a-z]//g;
+      $let =~ s/[^a-zA-Z1-9_\~]//g;
       $model{$curLetter}->{$let} = $freq;
       if(exists $modelTotals{$curLetter}){
         $modelTotals{$curLetter} += $freq;
