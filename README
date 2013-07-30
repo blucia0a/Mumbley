@@ -38,4 +38,4 @@ TO GENERATE A NEW MODEL (from the phoeneticized text in the file phoeneticized)
 
 TO MAKE YOUR COMPUTER SPOUT GIBBERISH:(using a model in the file called Model):
 ------------------------------------------------------------------------------
-./MumbleyMumbler.pl ./Model | xargs -Ifoo say -v whisper "foo"
+./MumbleyMumbler.pl ./Model | xargs say [[inpt PHON]]  -v whisper 
