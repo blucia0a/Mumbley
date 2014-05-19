@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use lib '/opt/local/lib/perl5/site_perl/5.8.9';
 use lib '/opt/local/lib/perl5/5.8.9';
+use List::Util "shuffle";
 
 my %model;
 my %modelTotals; 
@@ -11,7 +12,7 @@ my %modelTotals;
 &getModel($ARGV[0]);
 
 my $sent = "";
-my $syl = "EH";
+my ($syl) = shuffle keys %model;
 
 
 while(1){
